@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +37,18 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        let mut idx = self.count;
+        while idx > 1 {
+            let pa_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[pa_idx]) {
+                self.items.swap(idx, pa_idx);
+                idx = pa_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +68,17 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+
+        // 如果右子节点存在且比左子节点更小（或更大，取决于堆的类型），则返回右子节点
+        if right_idx <= self.count
+            && (self.comparator)(&self.items[right_idx], &self.items[left_idx])
+        {
+            right_idx
+        } else {
+            left_idx
+        }
     }
 }
 
@@ -85,7 +105,23 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+        let result = self.items.swap_remove(1);
+        self.count -= 1;
+        if self.count > 0 {
+            let mut idx = 1;
+            while self.children_present(idx) {
+                let smallest_child_idx = self.smallest_child_idx(idx);
+                if (self.comparator)(&self.items[idx], &self.items[smallest_child_idx]) {
+                    break; // 如果当前节点已经满足堆的性质，则停止
+                }
+                self.items.swap(idx, smallest_child_idx); // 交换当前节点和最小子节点
+                idx = smallest_child_idx; // 继续向下调整
+            }
+        }
+        Some(result)
     }
 }
 
